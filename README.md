@@ -73,7 +73,23 @@ Affected residents, barangay leaders, farmers, fisherfolk organizations, Indigen
 
 Only mark individual features above as **implemented** after real execution and tests; until then they describe intended MVP scope.
 
-## Architecture
+## Target architecture (planned)
+
+The final architecture uses a modular Python application: FastAPI exposes
+`GET /health` and `POST /run`, and Streamlit provides the human-facing UI. Both
+must use the same `InvestigationService`. Case Planner, Evidence Investigator,
+Evidence Critic, and Community Action Planner roles perform observable handoffs
+and decisions, with at most two automatic reinvestigation retries.
+
+A distinct PDF ingestion pipeline retains page provenance and stable chunk/citation
+IDs before indexing project, regulatory, technical-guideline, and scientific sources
+through Zetaris. No LLM training or fine-tuning is planned.
+
+FastAPI, `InvestigationService`, the ingestion pipeline, `run.py`, Docker packaging,
+and JSONL runtime tracing are not implemented. FastAPI is not yet declared in
+`requirements.txt`. Future tracing must emit genuine, redacted events to stdout
+and `logs/`, including run IDs, operations, decisions, handoffs, and retries.
+
 
 ```text
 Project PDFs + community context
@@ -138,7 +154,11 @@ NIGHTSHIFT_MODEL=
 
 These are **HydroGuard configuration conventions**, not verified vendor environment variable names. Adapt the corresponding application adapters to your HackOS setup guide. Configure NVIDIA credentials in Nightshift's **Providers** tab, not in this project.
 
-## Run the app
+## Planned UI entry point (not implemented)
+
+Root `app.py` is empty; the following is a future UI command, not a working
+HydroGuard workflow. Use the implemented offline audit command above today.
+
 
 ```bash
 python -m streamlit run app.py
@@ -146,13 +166,26 @@ python -m streamlit run app.py
 
 Then open the local URL printed by Streamlit (commonly `http://localhost:8501`).
 
-### Sample mode
-Set `SAMPLE_MODE=true` in `.env`. This mode is designed to demonstrate the UI and representative investigation workflow without external credentials. Any mock or prerecorded response must be unmistakably labeled **Sample / Synthetic**. Sample mode alone does not establish sponsor compliance.
+### Sample mode: current fixture and required replacement
 
-### Live mode
-Set `SAMPLE_MODE=false`, configure real sponsor services, ingest approved demo documents into the Zetaris-connected data source, and run the live integration smoke tests. Never silently fall back to sample responses if a live dependency is unavailable.
+The current CLI is a fixed synthetic regression/demo fixture with prerecorded
+Critic responses and final revision text. It is preserved, labeled, and does not
+satisfy the final input-dependent sample-mode requirement.
 
-## Suggested demonstration
+The target `SAMPLE_MODE=true` workflow must work without sponsor credentials using
+bundled source records and offline adapters that compute investigation decisions
+from inputs and evidence. It must not replay prerecorded critiques or final
+outputs by example ID, wording, or scenario label. Offline execution must be
+clearly distinguished from live sponsor integration.
+
+### Live mode (not implemented)
+
+The current CLI fails explicitly when the process environment sets
+`SAMPLE_MODE=false`. The target live workflow requires real configured sponsor
+services and indexed evidence, with no silent fallback to sample mode. No sponsor
+integration is verified by the existing fixture.
+
+## Planned demonstration (not yet implemented end to end)
 
 **Synthetic case:** A proposed industrial development states that its water demand will not materially affect existing domestic and agricultural water users. The disclosed materials include annual demand figures and wet-season observations, but no sufficient dry-season water balance.
 
@@ -222,7 +255,7 @@ Never commit tokens, secrets, personal details, or confidential project document
 
 ## Known limitations
 
-- Hackathon MVP focuses on one full **water-availability** investigation; Land, Air, and People are supported at a smaller demonstration depth.
+- Current implementation is one fixed synthetic **water-availability** fixture. Input-dependent investigations remain planned; Land, Air, and People currently have scope-rejection tests only.
 - Evidence not found in reviewed documents does not prove the evidence does not exist elsewhere.
 - The product is not a replacement for professional environmental assessment, legal advice, or government decision-making.
 - Arbitrary DOCX templates, scanned/OCR-only PDFs, and large-scale source ingestion may require further work.
