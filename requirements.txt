@@ -1,0 +1,26 @@
+# HydroGuard — baseline Python dependencies (Python 3.11+)
+# Versions are intentionally not locked until the environment is smoke-tested.
+# After a successful clean build, freeze/lock resolved dependencies for reproducibility.
+
+# User interface
+streamlit
+
+# Data and schemas
+pandas
+pydantic
+
+# HTTP clients and environment configuration
+httpx
+python-dotenv
+
+# PDF and DOCX processing
+PyMuPDF
+python-docx
+docxtpl
+
+# Testing
+pytest
+
+# Zetaris, Meterless World Model, and Nightshift adapters may use vendor-specific
+# packages or documented HTTP endpoints. Add SDKs ONLY after confirming their
+# names/versions from the HackOS Participant Setup Guide. Do not add imaginary SDKs.
