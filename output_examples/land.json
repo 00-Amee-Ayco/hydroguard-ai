@@ -1,0 +1,168 @@
+{
+  "run_id": "0cce524e-3dbb-4557-88e3-33bbc082c45d",
+  "status": "completed",
+  "finding": {
+    "finding_id": "land-claim-finding",
+    "claim_id": "land-claim",
+    "revision": 1,
+    "text": "The reviewed Land evidence does not sufficiently substantiate the claim 'Earthworks will not increase erosion or slope instability.'; evidence not identified: slope stability assessment.",
+    "claim_type": "evidence_gap",
+    "strength": "Weak",
+    "citation_ids": [
+      "sample-land-project"
+    ],
+    "assessment_basis_ids": [
+      "land-review"
+    ],
+    "gaps": [
+      "slope stability assessment"
+    ],
+    "limitations": [
+      "Only retrieved synthetic records were reviewed; missing evidence may exist elsewhere. No harm or legal determination is made."
+    ]
+  },
+  "citations": [
+    {
+      "source_id": "sample-land-project",
+      "document_id": "synthetic-land-disclosure",
+      "document_title": "Fictional Land Disclosure (Synthetic)",
+      "page": 3,
+      "chunk_id": "land-p3-c1",
+      "provenance": "synthetic",
+      "text": "Earthworks will not increase erosion or slope instability. Earthworks erosion baseline is surveyed; a slope assessment is not disclosed.",
+      "domain": "Land",
+      "kind": "project",
+      "evidence_items": [
+        "erosion baseline"
+      ]
+    },
+    {
+      "source_id": "sample-land-basis",
+      "document_id": "synthetic-land-review",
+      "document_title": "Synthetic Land Review Criterion (not a regulation)",
+      "page": 1,
+      "chunk_id": "land-review-p1-c1",
+      "provenance": "synthetic",
+      "text": "Review erosion baseline, slope stability assessment.",
+      "domain": "Land",
+      "kind": "basis",
+      "evidence_items": []
+    }
+  ],
+  "critic": {
+    "finding_id": "land-claim-finding",
+    "revision": 1,
+    "finding_fingerprint": "30bf6ff4e5ccc8cb23b73285c0a8f279ccc8eddf2158a119a65ecfd9cfab9fbe",
+    "decision": "approve",
+    "reason": "Offline evidence policy satisfied.",
+    "evidence_fingerprint": "bb745b985b7e3e6ea0e9bff600896921737ec7ef30abee4c5fee821bc5b0a839",
+    "response_origin": "offline_rule_based",
+    "live_inference": false,
+    "model_identity": "unverified; no model invoked"
+  },
+  "gate": {
+    "finding_id": "land-claim-finding",
+    "revision": 1,
+    "passed": true,
+    "reasons": []
+  },
+  "community_question": "During scoping: For the claim 'Earthworks will not increase erosion or slope instability.', can the proponent provide slope stability assessment and explain the implications for affected users?",
+  "audit": {
+    "mode": "Sample / Synthetic",
+    "execution": "input-dependent offline rules; no live AI or sponsor services",
+    "claim": {
+      "claim_id": "land-claim",
+      "project_name": "Fictional Philippine Development",
+      "domain": "Land",
+      "text": "Earthworks will not increase erosion or slope instability.",
+      "citation_ids": [
+        "sample-land-project"
+      ]
+    },
+    "sources": [
+      {
+        "source_id": "sample-land-project",
+        "document_id": "synthetic-land-disclosure",
+        "document_title": "Fictional Land Disclosure (Synthetic)",
+        "page": 3,
+        "chunk_id": "land-p3-c1",
+        "provenance": "synthetic",
+        "text": "Earthworks will not increase erosion or slope instability. Earthworks erosion baseline is surveyed; a slope assessment is not disclosed.",
+        "domain": "Land",
+        "kind": "project",
+        "evidence_items": [
+          "erosion baseline"
+        ]
+      },
+      {
+        "source_id": "sample-land-basis",
+        "document_id": "synthetic-land-review",
+        "document_title": "Synthetic Land Review Criterion (not a regulation)",
+        "page": 1,
+        "chunk_id": "land-review-p1-c1",
+        "provenance": "synthetic",
+        "text": "Review erosion baseline, slope stability assessment.",
+        "domain": "Land",
+        "kind": "basis",
+        "evidence_items": []
+      }
+    ],
+    "assessment_bases": [
+      {
+        "basis_id": "land-review",
+        "text": "Review erosion baseline, slope stability assessment",
+        "citation_ids": [
+          "sample-land-basis"
+        ],
+        "limitation": "Synthetic review criterion, not a legal applicability determination.",
+        "domain": "Land",
+        "required_items": [
+          "erosion baseline",
+          "slope stability assessment"
+        ]
+      }
+    ],
+    "history": [
+      {
+        "finding": {
+          "finding_id": "land-claim-finding",
+          "claim_id": "land-claim",
+          "revision": 1,
+          "text": "The reviewed Land evidence does not sufficiently substantiate the claim 'Earthworks will not increase erosion or slope instability.'; evidence not identified: slope stability assessment.",
+          "claim_type": "evidence_gap",
+          "strength": "Weak",
+          "citation_ids": [
+            "sample-land-project"
+          ],
+          "assessment_basis_ids": [
+            "land-review"
+          ],
+          "gaps": [
+            "slope stability assessment"
+          ],
+          "limitations": [
+            "Only retrieved synthetic records were reviewed; missing evidence may exist elsewhere. No harm or legal determination is made."
+          ]
+        },
+        "critic": {
+          "finding_id": "land-claim-finding",
+          "revision": 1,
+          "finding_fingerprint": "30bf6ff4e5ccc8cb23b73285c0a8f279ccc8eddf2158a119a65ecfd9cfab9fbe",
+          "decision": "approve",
+          "reason": "Offline evidence policy satisfied.",
+          "evidence_fingerprint": "bb745b985b7e3e6ea0e9bff600896921737ec7ef30abee4c5fee821bc5b0a839",
+          "response_origin": "offline_rule_based",
+          "live_inference": false,
+          "model_identity": "unverified; no model invoked"
+        },
+        "gate": {
+          "finding_id": "land-claim-finding",
+          "revision": 1,
+          "passed": true,
+          "reasons": []
+        }
+      }
+    ],
+    "consultation_question": "For the claim 'Earthworks will not increase erosion or slope instability.', can the proponent provide slope stability assessment and explain the implications for affected users?"
+  }
+}

@@ -1,7 +1,7 @@
-"""Independent fail-closed rules for the supported sample finding only."""
+"""Independent fail-closed validation over retrieved offline evidence."""
 from collections.abc import Mapping
 
-from hydroguard.data.sample import GAP_FINDING
+from hydroguard.evidence.assessment import context_fingerprint, derive_finding
 from hydroguard.evidence.models import (
     AssessmentBasis, CriticDecision, EvidenceFinding, EvidenceSource, GateResult, ProjectClaim,
 )
@@ -37,20 +37,29 @@ def evaluate_finding(
             reasons.append(f"Invalid assessment basis: {basis_id}")
         else:
             check_citations(basis.citation_ids, "assessment basis")
+            if basis.domain != claim.domain or not basis.required_items:
+                reasons.append("Assessment basis is not applicable to this claim.")
+            if any(sources[c].kind != "basis" or sources[c].domain != claim.domain
+                   for c in basis.citation_ids if c in sources):
+                reasons.append("Assessment basis cites an unsuitable source.")
     if critic is None:
         reasons.append("Missing Critic decision.")
     else:
         if (critic.finding_id != finding.finding_id or critic.revision != finding.revision
                 or critic.finding_fingerprint != finding.fingerprint()):
             reasons.append("Stale or mismatched Critic approval.")
+        if critic.evidence_fingerprint != context_fingerprint(sources, bases, claim):
+            reasons.append("Stale evidence context in Critic approval.")
         if critic.decision != "approve":
             reasons.append("Critic has not approved this finding.")
-    # A strength label or LLM approval cannot establish harm or illegality.
-    if finding.claim_type != "evidence_gap":
-        reasons.append("Definitive harm and illegality findings are unsupported in this slice.")
-    elif finding.text != GAP_FINDING or claim.domain != "Water":
-        reasons.append("Evidence-gap wording/domain is outside this slice's reviewed scope.")
-    if not finding.gaps or not finding.limitations:
+    if finding.claim_type not in ("evidence_gap", "evidence_summary"):
+        reasons.append("Definitive harm and illegality findings are unsupported in offline mode.")
+    expected = derive_finding(claim, sources, bases, finding.revision)
+    # Recompute the safe finding from the actual records, independent of approval.
+    for field in ("text", "claim_type", "strength", "citation_ids", "assessment_basis_ids", "gaps"):
+        if getattr(finding, field) != getattr(expected, field):
+            reasons.append(f"Finding {field} does not match the reviewed evidence.")
+    if not finding.limitations or (finding.claim_type == "evidence_gap" and not finding.gaps):
         reasons.append("Explicit evidence gaps and review limitations are required.")
     return GateResult(finding_id=finding.finding_id, revision=finding.revision,
                       passed=not reasons, reasons=tuple(reasons))

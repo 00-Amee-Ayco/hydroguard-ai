@@ -1,0 +1,15 @@
+{
+  "project_claim": {
+    "claim_id": "air-claim",
+    "project_name": "Fictional Philippine Development",
+    "text": "Project dust emissions will not affect nearby air quality receptors."
+  },
+  "domain": "Air",
+  "case_context": {
+    "stage": "scoping",
+    "community_notes": "Synthetic community context."
+  },
+  "evidence_references": [
+    "sample-air-project"
+  ]
+}

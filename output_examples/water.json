@@ -1,0 +1,166 @@
+{
+  "run_id": "006f3e86-808a-4556-b1e2-a1f900c36a7d",
+  "status": "completed",
+  "finding": {
+    "finding_id": "water-claim-finding",
+    "claim_id": "water-claim",
+    "revision": 1,
+    "text": "The reviewed Water evidence does not sufficiently substantiate the claim 'Project water demand will not significantly affect existing water users.'; evidence not identified: dry-season water balance, existing water users.",
+    "claim_type": "evidence_gap",
+    "strength": "Insufficient",
+    "citation_ids": [
+      "sample-project-1"
+    ],
+    "assessment_basis_ids": [
+      "dry-season-review"
+    ],
+    "gaps": [
+      "dry-season water balance",
+      "existing water users"
+    ],
+    "limitations": [
+      "Only retrieved synthetic records were reviewed; missing evidence may exist elsewhere. No harm or legal determination is made."
+    ]
+  },
+  "citations": [
+    {
+      "source_id": "sample-project-1",
+      "document_id": "synthetic-water-disclosure",
+      "document_title": "Fictional Water Disclosure (Synthetic)",
+      "page": 3,
+      "chunk_id": "disclosure-p3-c1",
+      "provenance": "synthetic",
+      "text": "Project water demand will not significantly affect existing water users. Water demand is described using annual totals and wet-season observations.",
+      "domain": "Water",
+      "kind": "project",
+      "evidence_items": []
+    },
+    {
+      "source_id": "sample-basis-1",
+      "document_id": "synthetic-water-review",
+      "document_title": "Synthetic Water Review Criterion (not a regulation)",
+      "page": 1,
+      "chunk_id": "water-review-p1-c1",
+      "provenance": "synthetic",
+      "text": "Review dry-season water balance, existing water users.",
+      "domain": "Water",
+      "kind": "basis",
+      "evidence_items": []
+    }
+  ],
+  "critic": {
+    "finding_id": "water-claim-finding",
+    "revision": 1,
+    "finding_fingerprint": "7212257454dbee4044529c6a34265ddb6ab38a3507c608a11f12fbad787f9c33",
+    "decision": "approve",
+    "reason": "Offline evidence policy satisfied.",
+    "evidence_fingerprint": "279aeb3db3420354c0551a5a76b30fcb9c0e247166da1bfe78a828f46e179c5a",
+    "response_origin": "offline_rule_based",
+    "live_inference": false,
+    "model_identity": "unverified; no model invoked"
+  },
+  "gate": {
+    "finding_id": "water-claim-finding",
+    "revision": 1,
+    "passed": true,
+    "reasons": []
+  },
+  "community_question": "During scoping: For the claim 'Project water demand will not significantly affect existing water users.', can the proponent provide dry-season water balance, existing water users and explain the implications for affected users?",
+  "audit": {
+    "mode": "Sample / Synthetic",
+    "execution": "input-dependent offline rules; no live AI or sponsor services",
+    "claim": {
+      "claim_id": "water-claim",
+      "project_name": "Fictional Philippine Development",
+      "domain": "Water",
+      "text": "Project water demand will not significantly affect existing water users.",
+      "citation_ids": [
+        "sample-project-1"
+      ]
+    },
+    "sources": [
+      {
+        "source_id": "sample-project-1",
+        "document_id": "synthetic-water-disclosure",
+        "document_title": "Fictional Water Disclosure (Synthetic)",
+        "page": 3,
+        "chunk_id": "disclosure-p3-c1",
+        "provenance": "synthetic",
+        "text": "Project water demand will not significantly affect existing water users. Water demand is described using annual totals and wet-season observations.",
+        "domain": "Water",
+        "kind": "project",
+        "evidence_items": []
+      },
+      {
+        "source_id": "sample-basis-1",
+        "document_id": "synthetic-water-review",
+        "document_title": "Synthetic Water Review Criterion (not a regulation)",
+        "page": 1,
+        "chunk_id": "water-review-p1-c1",
+        "provenance": "synthetic",
+        "text": "Review dry-season water balance, existing water users.",
+        "domain": "Water",
+        "kind": "basis",
+        "evidence_items": []
+      }
+    ],
+    "assessment_bases": [
+      {
+        "basis_id": "dry-season-review",
+        "text": "Review dry-season water balance, existing water users",
+        "citation_ids": [
+          "sample-basis-1"
+        ],
+        "limitation": "Synthetic review criterion, not a legal applicability determination.",
+        "domain": "Water",
+        "required_items": [
+          "dry-season water balance",
+          "existing water users"
+        ]
+      }
+    ],
+    "history": [
+      {
+        "finding": {
+          "finding_id": "water-claim-finding",
+          "claim_id": "water-claim",
+          "revision": 1,
+          "text": "The reviewed Water evidence does not sufficiently substantiate the claim 'Project water demand will not significantly affect existing water users.'; evidence not identified: dry-season water balance, existing water users.",
+          "claim_type": "evidence_gap",
+          "strength": "Insufficient",
+          "citation_ids": [
+            "sample-project-1"
+          ],
+          "assessment_basis_ids": [
+            "dry-season-review"
+          ],
+          "gaps": [
+            "dry-season water balance",
+            "existing water users"
+          ],
+          "limitations": [
+            "Only retrieved synthetic records were reviewed; missing evidence may exist elsewhere. No harm or legal determination is made."
+          ]
+        },
+        "critic": {
+          "finding_id": "water-claim-finding",
+          "revision": 1,
+          "finding_fingerprint": "7212257454dbee4044529c6a34265ddb6ab38a3507c608a11f12fbad787f9c33",
+          "decision": "approve",
+          "reason": "Offline evidence policy satisfied.",
+          "evidence_fingerprint": "279aeb3db3420354c0551a5a76b30fcb9c0e247166da1bfe78a828f46e179c5a",
+          "response_origin": "offline_rule_based",
+          "live_inference": false,
+          "model_identity": "unverified; no model invoked"
+        },
+        "gate": {
+          "finding_id": "water-claim-finding",
+          "revision": 1,
+          "passed": true,
+          "reasons": []
+        }
+      }
+    ],
+    "consultation_question": "For the claim 'Project water demand will not significantly affect existing water users.', can the proponent provide dry-season water balance, existing water users and explain the implications for affected users?"
+  }
+}

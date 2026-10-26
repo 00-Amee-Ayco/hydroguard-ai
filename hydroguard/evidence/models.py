@@ -25,6 +25,9 @@ class EvidenceSource(Record):
     chunk_id: str = Field(min_length=1)
     provenance: Literal["project-supplied", "government", "research", "synthetic"]
     text: str = Field(min_length=1)
+    domain: Literal["Water", "Land", "Air", "People"] = "Water"
+    kind: Literal["project", "evidence", "basis"] = "project"
+    evidence_items: tuple[str, ...] = ()
 
 
 class ProjectClaim(Record):
@@ -40,6 +43,8 @@ class AssessmentBasis(Record):
     text: str
     citation_ids: tuple[str, ...]
     limitation: str
+    domain: Literal["Water", "Land", "Air", "People"] = "Water"
+    required_items: tuple[str, ...] = ()
 
 
 class EvidenceFinding(Record):
@@ -47,7 +52,7 @@ class EvidenceFinding(Record):
     claim_id: str
     revision: int = Field(ge=1)
     text: str
-    claim_type: Literal["evidence_gap", "definitive_harm", "illegality"]
+    claim_type: Literal["evidence_gap", "evidence_summary", "definitive_harm", "illegality"]
     strength: EvidenceStrength
     citation_ids: tuple[str, ...] = ()
     assessment_basis_ids: tuple[str, ...] = ()
@@ -64,7 +69,8 @@ class CriticDecision(Record):
     finding_fingerprint: str
     decision: Literal["approve", "narrow", "reject", "reinvestigate"]
     reason: str
-    response_origin: Literal["prerecorded_fixture"] = "prerecorded_fixture"
+    evidence_fingerprint: str = ""
+    response_origin: Literal["offline_rule_based"] = "offline_rule_based"
     live_inference: Literal[False] = False
     model_identity: Literal["unverified; no model invoked"] = "unverified; no model invoked"
 
@@ -84,8 +90,8 @@ class RevisionRecord(Record):
 
 class AuditResult(Record):
     mode: Literal["Sample / Synthetic"] = "Sample / Synthetic"
-    execution: Literal["prerecorded demonstration; no live AI or sponsor services"] = (
-        "prerecorded demonstration; no live AI or sponsor services"
+    execution: Literal["input-dependent offline rules; no live AI or sponsor services"] = (
+        "input-dependent offline rules; no live AI or sponsor services"
     )
     claim: ProjectClaim
     sources: tuple[EvidenceSource, ...]

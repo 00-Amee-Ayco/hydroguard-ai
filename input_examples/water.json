@@ -1,0 +1,15 @@
+{
+  "project_claim": {
+    "claim_id": "water-claim",
+    "project_name": "Fictional Philippine Development",
+    "text": "Project water demand will not significantly affect existing water users."
+  },
+  "domain": "Water",
+  "case_context": {
+    "stage": "scoping",
+    "community_notes": "Synthetic community context."
+  },
+  "evidence_references": [
+    "sample-project-1"
+  ]
+}

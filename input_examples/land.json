@@ -1,0 +1,15 @@
+{
+  "project_claim": {
+    "claim_id": "land-claim",
+    "project_name": "Fictional Philippine Development",
+    "text": "Earthworks will not increase erosion or slope instability."
+  },
+  "domain": "Land",
+  "case_context": {
+    "stage": "scoping",
+    "community_notes": "Synthetic community context."
+  },
+  "evidence_references": [
+    "sample-land-project"
+  ]
+}
