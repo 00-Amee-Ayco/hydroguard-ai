@@ -10,55 +10,121 @@ It helps users review project disclosures across **Water, Land, Air, and People*
 
 ## Implemented offline evidence-auditing slice
 
-The repository now includes a synthetic water-claim audit, Pydantic records, an
-independent deterministic gate, and a two-entry in-memory revision history.
-Run it from the repository root after installing the requirements:
+The sample audit accepts a typed claim or CLI claim text and domain. It performs
+lexical retrieval over bundled synthetic records, evaluates explicit evidence
+criteria, computes a finding, runs an offline rule-based Critic, and independently
+validates the result through the deterministic gate. Decisions do not branch on
+fixture IDs or exact example sentences. No LLM is trained or invoked.
 
 ```bash
-SAMPLE_MODE=true .venv/bin/python -m hydroguard.services.audit
+SAMPLE_MODE=true .venv/bin/python -m hydroguard.services.audit --domain Water
+SAMPLE_MODE=true .venv/bin/python -m hydroguard.services.audit --domain Land
+SAMPLE_MODE=true .venv/bin/python -m hydroguard.services.audit --domain Air --claim "Project dust emissions will not affect nearby air quality receptors."
 ```
 
-The command prints JSON containing the source registry, fictional project claim,
-synthetic assessment basis, both findings, prerecorded Critic responses, gate
-results, and the consultation question. Every source is synthetic; the assessment
-basis is an exercise criterion, not a Philippine legal provision.
+JSON output contains the actual retrieved sources, claim, applicable synthetic
+assessment basis, findings, Critic decisions, gate results, and community question.
+Every citation resolves against these records, preserving document/page/chunk
+provenance. Synthetic review criteria are not legal requirements.
 
-The preliminary finding, “The project will cause community water shortages.”,
-is rejected. The revised finding is:
+The offline Critic is labeled `offline_rule_based`, with `live_inference=false`
+and no verified model identity. It computes decisions from evidence-policy checks;
+it is not independent scientific expertise or live NVIDIA/Meterless inference.
+The gate separately executes those checks, rejects harm and illegality claims,
+and binds approvals to the finding content/revision and evidence context.
+Evidence gaps are computed from missing curated `evidence_items` required by the
+assessment basis. Complete coverage produces a qualified evidence inventory,
+not assurance of safety. Questions are emitted only for gate-approved findings.
 
-> The disclosed evidence does not sufficiently establish that existing water users will remain unaffected during dry-season conditions.
+Python callers may supply `run_sample_audit(claim, registry=..., bases=...,
+preliminary=...)`. A rejected preliminary finding is revised once from reviewed
+evidence; history remains in memory. The default run starts directly from the
+computed finding and does not manufacture an overclaim. Unmatched claims or
+missing citations/bases fail closed and receive no consultation question.
 
-The gate checks finding and project citations, cited assessment-basis records,
-current-revision Critic approval and its content fingerprint, explicit gaps and
-limitations, and the allowed claim type. This first slice permits only the exact
-reviewed Water evidence-gap wording. It blocks all definitive harm and illegality
-findings regardless of strength labels or Critic approval. It does not perform
-general semantic validation of arbitrary findings or source content.
+Limitations: retrieval is lexical and domain-scoped; evidence coverage uses
+curated structured facts, not general semantic interpretation of arbitrary PDFs.
+Changing prose alone does not extract new evidence items. New evidence must be
+represented accurately in both source text and curated facts. People assessments,
+PDF ingestion, Streamlit UI, persistent World Model, reports, and sponsor
+integrations remain planned. The API and its per-run tracing are implemented below. This task does not establish full hackathon compliance.
 
-The consultation question requests a dry-season water balance addressing supply,
-project demand, existing users, and their protection during dry periods. It is
-returned only after the final gate passes.
-
-**All Critic responses and the revision step are prerecorded sample behavior.**
-No live model, Zetaris query, World Model, autonomous replanning, DOCX export,
-or Streamlit workflow is implemented by this slice. History is returned as JSON,
-not persisted to a database. Land, Air, and People have scope-rejection tests,
-not implemented assessment workflows.
-
-This command reads `SAMPLE_MODE` from the process environment, defaulting to
-`true`; it does not load `.env`. Setting `SAMPLE_MODE=false` raises an explicit
-“Live mode is not implemented” error. Existing `.env.example` integration fields
-remain future configuration conventions and are unused here.
-
-Run tests with the virtual environment activated:
+The CLI reads `SAMPLE_MODE` from the process environment (default `true`), not
+`.env`. `SAMPLE_MODE=false` raises “Live mode is not implemented”; no silent fallback
+occurs. Sponsor fields in `.env.example` remain unused placeholders.
 
 ```bash
 source .venv/bin/activate
 python -m pytest -v
 ```
 
-The remaining MVP features and sponsor integrations below are target architecture,
-not verified implementations. Root `app.py` remains an empty scaffold.
+Root `app.py` remains an empty scaffold.
+
+## Run the FastAPI interface
+
+From the repository root:
+
+```bash
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python run.py
+```
+
+The API listens on `http://127.0.0.1:8000`; interactive request documentation is
+available at `/docs`. `run.py` loads local `.env` without overriding process
+variables. Sample mode defaults to true and needs no sponsor credentials.
+
+```bash
+curl http://127.0.0.1:8000/health
+curl -X POST http://127.0.0.1:8000/run -H 'Content-Type: application/json' --data-binary @input_examples/water.json
+```
+
+`GET /health` reports process health, sample/live-unavailable mode, execution
+availability, and explicitly unverified sponsor integrations. It performs no
+sponsor calls. `POST /run` accepts:
+
+- `project_claim`: `claim_id`, `project_name`, and nonblank `text`.
+- `domain`: `Water`, `Land`, or `Air`.
+- `case_context`: `stage` (`scoping`, `consultation`, or `review`) and optional
+  private `community_notes`. Stage qualifies the question; notes are accepted
+  but are not interpreted by the offline evidence rules or recorded in traces.
+- `evidence_references`: source IDs from the bundled registry, restricting the
+  retrieval pool. An empty list searches all bundled records for the domain.
+  Unknown, cross-domain, and assessment-basis-only references are rejected.
+
+Responses contain `run_id`, `status`, `finding`, resolved `citations`, `critic`,
+`gate`, `community_question`, and the complete `audit` history. A blocked gate
+returns `status=unresolved` and no question, rather than publishing a conclusion.
+Invalid requests return 422; unsupported live execution returns 503. Unexpected
+failures return a sanitized 500. This local judge/demo interface has no deployment
+authentication or access controls.
+
+`InvestigationService` wraps the existing audit workflow. API runs emit genuine
+JSONL events to stdout and `logs/<run_id>.jsonl` (`HYDROGUARD_LOG_DIR` overrides the
+directory). Events include timestamps, sequence, actual Planner/Investigator/
+Critic/gate/action operations, source IDs, handoffs, branch decisions, retries,
+and terminal status. No retry, sponsor call, or World Model event is invented.
+The Python audit helper can take `trace=RunTrace()`; the existing standalone CLI
+keeps its JSON-only output unless a trace is explicitly supplied.
+
+Raw claims, project/community identifiers, community notes, credentials, and
+exception text are omitted from traces. Source IDs outside the public bundled
+registry are redacted. Validation errors omit input values and field locations;
+HTTP access logging is disabled to avoid logging request URLs. Responses still
+contain the caller's claim and should be handled as private case data. Local
+logs remain ignored by Git.
+
+Three structured requests are in `input_examples/{water,land,air}.json`. Their
+matching `output_examples/*.json` were generated by executing the actual API via
+FastAPI's in-process HTTP client, not by composing response fixtures. Regenerate:
+
+```bash
+SAMPLE_MODE=true python -m scripts.generate_examples
+```
+
+Generation emits real traces and assigns new run IDs. Runtime application modules
+never load output examples as responses. Tests compare new computed responses
+with saved examples after excluding the intentionally unique run ID.
 
 ## Intended users
 Affected residents, barangay leaders, farmers, fisherfolk organizations, Indigenous community representatives, NGOs, and community advisers preparing for scoping or environmental consultation.
@@ -73,7 +139,7 @@ Affected residents, barangay leaders, farmers, fisherfolk organizations, Indigen
 
 Only mark individual features above as **implemented** after real execution and tests; until then they describe intended MVP scope.
 
-## Target architecture (planned)
+## Architecture and remaining targets
 
 The final architecture uses a modular Python application: FastAPI exposes
 `GET /health` and `POST /run`, and Streamlit provides the human-facing UI. Both
@@ -85,10 +151,9 @@ A distinct PDF ingestion pipeline retains page provenance and stable chunk/citat
 IDs before indexing project, regulatory, technical-guideline, and scientific sources
 through Zetaris. No LLM training or fine-tuning is planned.
 
-FastAPI, `InvestigationService`, the ingestion pipeline, `run.py`, Docker packaging,
-and JSONL runtime tracing are not implemented. FastAPI is not yet declared in
-`requirements.txt`. Future tracing must emit genuine, redacted events to stdout
-and `logs/`, including run IDs, operations, decisions, handoffs, and retries.
+FastAPI, `InvestigationService`, `run.py`, and per-run JSONL tracing are implemented
+for offline execution. The ingestion pipeline, Streamlit workflow, Docker
+packaging, persistent Engine, and live sponsor integrations remain planned.
 
 
 ```text
@@ -121,7 +186,7 @@ Project PDFs + community context
 - Git
 - A working Python package installer (`pip`)
 - For **live mode:** authorized Zetaris and Meterless Nightshift access, a working World Model implementation, and an available NVIDIA Nemotron model routed through Nightshift
-- For **sample mode:** included synthetic fixtures and prerecorded Critic results (CLI slice only)
+- For **sample mode:** bundled synthetic source records and computed offline rules (CLI and API slices)
 
 ## Installation from a clean clone
 
@@ -166,17 +231,12 @@ python -m streamlit run app.py
 
 Then open the local URL printed by Streamlit (commonly `http://localhost:8501`).
 
-### Sample mode: current fixture and required replacement
+### Sample mode: input-dependent offline adapters
 
-The current CLI is a fixed synthetic regression/demo fixture with prerecorded
-Critic responses and final revision text. It is preserved, labeled, and does not
-satisfy the final input-dependent sample-mode requirement.
-
-The target `SAMPLE_MODE=true` workflow must work without sponsor credentials using
-bundled source records and offline adapters that compute investigation decisions
-from inputs and evidence. It must not replay prerecorded critiques or final
-outputs by example ID, wording, or scenario label. Offline execution must be
-clearly distinguished from live sponsor integration.
+The implemented CLI computes lexical retrieval, evidence coverage, critique,
+validation, and questions from inputs and retrieved synthetic records. The three
+domain examples above use different evidence coverage. Offline adapters do not
+establish any sponsor integration. See the implementation limits above.
 
 ### Live mode (not implemented)
 
@@ -199,15 +259,25 @@ integration is verified by the existing fixture.
 
 The correct conclusion is **not** that the project necessarily causes water shortages. It is that the available disclosed evidence may not substantiate the project's assurance, if that is what the audited materials establish.
 
-## Three example inputs and expected behavior
+## Three executed sample inputs and matching results
 
-| Input | Expected behavior (not a measured output) |
-|---|---|
-| “Does the project show a dry-season water balance?” | Cite examined pages and distinguish missing material from proof that no study exists. |
-| “Will the project cause water shortages?” | Reject an unsupported categorical conclusion and state the specific missing evidence. |
-| “What should we ask during public scoping?” | Generate stage-appropriate questions linked to approved/qualified Evidence Ledger findings. |
+Executed locally using `project_claim(domain)` and `run_sample_audit(claim)`:
 
-Replace this table with **actual captured sample outputs** before submitting.
+- **Water:** “Project water demand will not significantly affect existing water users.”
+  Gate passed a qualified gap finding with **Insufficient** evidence; missing items:
+  `dry-season water balance`, `existing water users`. The question requests those
+  records and their implications for affected users.
+- **Land:** “Earthworks will not increase erosion or slope instability.”
+  Gate passed a qualified gap finding with **Weak** evidence; the erosion baseline
+  is present but `slope stability assessment` is missing. The question requests
+  that assessment.
+- **Air:** “Project dust emissions will not affect nearby air quality receptors.”
+  Gate passed a qualified gap finding with **Weak** evidence; particulate baseline
+  and dispersion assessment are present but `receptor inventory` is missing.
+  The question requests that inventory.
+
+These are actual offline result summaries, not live sponsor outputs. Rerun the
+CLI commands above to inspect full findings, citations, and generated questions.
 
 ## Evidence strengths
 
@@ -255,7 +325,7 @@ Never commit tokens, secrets, personal details, or confidential project document
 
 ## Known limitations
 
-- Current implementation is one fixed synthetic **water-availability** fixture. Input-dependent investigations remain planned; Land, Air, and People currently have scope-rejection tests only.
+- Current implementation supports bounded offline Water, Land, and Air investigations over curated synthetic records. People and general document interpretation remain unimplemented.
 - Evidence not found in reviewed documents does not prove the evidence does not exist elsewhere.
 - The product is not a replacement for professional environmental assessment, legal advice, or government decision-making.
 - Arbitrary DOCX templates, scanned/OCR-only PDFs, and large-scale source ingestion may require further work.
