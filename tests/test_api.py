@@ -62,7 +62,8 @@ def test_invalid_evidence_reference(client, refs):
     assert client.post("/run", json=body).status_code == 422
 
 
-def test_live_fails_transparently(client, monkeypatch):
+def test_live_fails_transparently(client, monkeypatch, tmp_path):
+    monkeypatch.setenv("ZETARIS_ENV_FILE", str(tmp_path / "missing.env"))
     monkeypatch.setenv("SAMPLE_MODE", "false")
     assert client.get("/health").json()["execution_available"] is False
     assert client.post("/run", json=payload()).status_code == 503

@@ -24,3 +24,13 @@ logs/
 
 # OS
 .DS_Store
+
+# Private/licence-unverified knowledge sources and extracted full text
+/data/knowledge/
+/data/processed/
+
+# Local case documents and exported evidence
+/data/cases/
+
+# Private provider settings and Runtime tokens
+/data/providers/

@@ -4,10 +4,11 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from hydroguard.services.audit import LiveModeUnavailable
+from hydroguard.data.zetaris import ZetarisRetrievalError
 from hydroguard.services.investigation import (InvestigationService, InvalidEvidenceReference,
                                                RunRequest, RunResponse)
 
-app = FastAPI(title="HydroGuard", description="Offline synthetic evidence audit; no live sponsor inference.")
+app = FastAPI(title="HydroGuard", description="Sample audit or live Zetaris regulatory retrieval; no live AI inference.")
 service = InvestigationService()
 
 
@@ -21,7 +22,7 @@ async def invalid_request(request: Request, exc: RequestValidationError):
 @app.get("/health")
 def health():
     offline = os.environ.get("SAMPLE_MODE", "true").lower() == "true"
-    return {"status": "ok", "mode": "sample" if offline else "live_unavailable",
+    return {"status": "ok", "mode": "sample" if offline else "live_retrieval_only",
             "execution_available": offline, "sponsor_integrations_verified": False}
 
 
@@ -32,6 +33,8 @@ def run(request: RunRequest):
     except InvalidEvidenceReference:
         raise HTTPException(status_code=422, detail="Unknown or inapplicable evidence reference") from None
     except LiveModeUnavailable:
-        raise HTTPException(status_code=503, detail="Live execution is unavailable; configure SAMPLE_MODE=true") from None
+        raise HTTPException(status_code=503, detail="Live Zetaris configuration is unavailable; check local configuration") from None
+    except ZetarisRetrievalError:
+        raise HTTPException(status_code=502, detail="Live Zetaris retrieval failed; no sample fallback") from None
     except Exception:
         raise HTTPException(status_code=500, detail="Investigation failed; consult the sanitized run trace") from None

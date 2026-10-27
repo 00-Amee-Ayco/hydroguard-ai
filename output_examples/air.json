@@ -1,5 +1,5 @@
 {
-  "run_id": "5ec702e8-cc3b-42c3-a67a-ccc19c3f0972",
+  "run_id": "7e850b87-b03b-47e4-b342-8ed03234804e",
   "status": "completed",
   "finding": {
     "finding_id": "air-claim-finding",
@@ -35,7 +35,15 @@
       "evidence_items": [
         "particulate baseline",
         "dispersion assessment"
-      ]
+      ],
+      "is_synthetic": null,
+      "case_id": null,
+      "source_type": null,
+      "original_filename": null,
+      "locator": null,
+      "issuing_body_or_author": null,
+      "publication_or_effective_date": null,
+      "original_source_url": null
     },
     {
       "source_id": "sample-air-basis",
@@ -47,7 +55,15 @@
       "text": "Review particulate baseline, dispersion assessment, receptor inventory.",
       "domain": "Air",
       "kind": "basis",
-      "evidence_items": []
+      "evidence_items": [],
+      "is_synthetic": null,
+      "case_id": null,
+      "source_type": null,
+      "original_filename": null,
+      "locator": null,
+      "issuing_body_or_author": null,
+      "publication_or_effective_date": null,
+      "original_source_url": null
     }
   ],
   "critic": {
@@ -56,7 +72,7 @@
     "finding_fingerprint": "f1db304d85121dcb7df13ff9425e3204a6d3480628eca722a749bfab03bc6bff",
     "decision": "approve",
     "reason": "Offline evidence policy satisfied.",
-    "evidence_fingerprint": "2600531e3acf95e55119e6a4202b301c832f2c28f298090692f970d1e22449a3",
+    "evidence_fingerprint": "57e09a0942bd340142236ff5d8158187c1ac16046dd5b34c3c61f6b8544afaec",
     "response_origin": "offline_rule_based",
     "live_inference": false,
     "model_identity": "unverified; no model invoked"
@@ -94,7 +110,15 @@
         "evidence_items": [
           "particulate baseline",
           "dispersion assessment"
-        ]
+        ],
+        "is_synthetic": null,
+        "case_id": null,
+        "source_type": null,
+        "original_filename": null,
+        "locator": null,
+        "issuing_body_or_author": null,
+        "publication_or_effective_date": null,
+        "original_source_url": null
       },
       {
         "source_id": "sample-air-basis",
@@ -106,7 +130,15 @@
         "text": "Review particulate baseline, dispersion assessment, receptor inventory.",
         "domain": "Air",
         "kind": "basis",
-        "evidence_items": []
+        "evidence_items": [],
+        "is_synthetic": null,
+        "case_id": null,
+        "source_type": null,
+        "original_filename": null,
+        "locator": null,
+        "issuing_body_or_author": null,
+        "publication_or_effective_date": null,
+        "original_source_url": null
       }
     ],
     "assessment_bases": [
@@ -153,7 +185,7 @@
           "finding_fingerprint": "f1db304d85121dcb7df13ff9425e3204a6d3480628eca722a749bfab03bc6bff",
           "decision": "approve",
           "reason": "Offline evidence policy satisfied.",
-          "evidence_fingerprint": "2600531e3acf95e55119e6a4202b301c832f2c28f298090692f970d1e22449a3",
+          "evidence_fingerprint": "57e09a0942bd340142236ff5d8158187c1ac16046dd5b34c3c61f6b8544afaec",
           "response_origin": "offline_rule_based",
           "live_inference": false,
           "model_identity": "unverified; no model invoked"

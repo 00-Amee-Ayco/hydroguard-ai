@@ -4,6 +4,8 @@ import os
 from collections.abc import Mapping
 from hydroguard.services.trace import RunTrace
 from hydroguard.ai.sample import sample_critic
+from hydroguard.agents.investigator import EvidenceInvestigator
+from hydroguard.data.retrieval import SampleEvidenceRetriever
 from hydroguard.data.sample import assessment_bases, project_claim, retrieve, source_registry
 from hydroguard.evidence.assessment import derive_finding, display_text
 from hydroguard.evidence.gate import evaluate_finding
@@ -29,7 +31,9 @@ def run_sample_audit(
     selected_bases = {key: basis for key, basis in available_bases.items() if basis.domain == claim.domain}
     if trace:
         trace.emit("Case Planner", "plan_domain_retrieval", handoff="Evidence Investigator")
-    retrieved = retrieve(claim, registry)
+    # Keep the existing retrieval function injectable for tests and callers.
+    retriever = SampleEvidenceRetriever(registry, retrieve_fn=retrieve)
+    retrieved = EvidenceInvestigator(retriever).investigate(claim)
     if trace:
         trace.emit("Evidence Investigator", "lexical_retrieval", source_ids=tuple(retrieved), handoff="Evidence Critic")
     # An input citation is validated rather than silently replaced.

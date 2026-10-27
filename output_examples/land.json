@@ -1,5 +1,5 @@
 {
-  "run_id": "0cce524e-3dbb-4557-88e3-33bbc082c45d",
+  "run_id": "fa14b797-4299-4099-86f9-ef096bfa2a9e",
   "status": "completed",
   "finding": {
     "finding_id": "land-claim-finding",
@@ -34,7 +34,15 @@
       "kind": "project",
       "evidence_items": [
         "erosion baseline"
-      ]
+      ],
+      "is_synthetic": null,
+      "case_id": null,
+      "source_type": null,
+      "original_filename": null,
+      "locator": null,
+      "issuing_body_or_author": null,
+      "publication_or_effective_date": null,
+      "original_source_url": null
     },
     {
       "source_id": "sample-land-basis",
@@ -46,7 +54,15 @@
       "text": "Review erosion baseline, slope stability assessment.",
       "domain": "Land",
       "kind": "basis",
-      "evidence_items": []
+      "evidence_items": [],
+      "is_synthetic": null,
+      "case_id": null,
+      "source_type": null,
+      "original_filename": null,
+      "locator": null,
+      "issuing_body_or_author": null,
+      "publication_or_effective_date": null,
+      "original_source_url": null
     }
   ],
   "critic": {
@@ -55,7 +71,7 @@
     "finding_fingerprint": "30bf6ff4e5ccc8cb23b73285c0a8f279ccc8eddf2158a119a65ecfd9cfab9fbe",
     "decision": "approve",
     "reason": "Offline evidence policy satisfied.",
-    "evidence_fingerprint": "bb745b985b7e3e6ea0e9bff600896921737ec7ef30abee4c5fee821bc5b0a839",
+    "evidence_fingerprint": "c3aeb526990e9bd195214fb71736d38509b1014e2492ebe580f714838ae2bb0e",
     "response_origin": "offline_rule_based",
     "live_inference": false,
     "model_identity": "unverified; no model invoked"
@@ -92,7 +108,15 @@
         "kind": "project",
         "evidence_items": [
           "erosion baseline"
-        ]
+        ],
+        "is_synthetic": null,
+        "case_id": null,
+        "source_type": null,
+        "original_filename": null,
+        "locator": null,
+        "issuing_body_or_author": null,
+        "publication_or_effective_date": null,
+        "original_source_url": null
       },
       {
         "source_id": "sample-land-basis",
@@ -104,7 +128,15 @@
         "text": "Review erosion baseline, slope stability assessment.",
         "domain": "Land",
         "kind": "basis",
-        "evidence_items": []
+        "evidence_items": [],
+        "is_synthetic": null,
+        "case_id": null,
+        "source_type": null,
+        "original_filename": null,
+        "locator": null,
+        "issuing_body_or_author": null,
+        "publication_or_effective_date": null,
+        "original_source_url": null
       }
     ],
     "assessment_bases": [
@@ -150,7 +182,7 @@
           "finding_fingerprint": "30bf6ff4e5ccc8cb23b73285c0a8f279ccc8eddf2158a119a65ecfd9cfab9fbe",
           "decision": "approve",
           "reason": "Offline evidence policy satisfied.",
-          "evidence_fingerprint": "bb745b985b7e3e6ea0e9bff600896921737ec7ef30abee4c5fee821bc5b0a839",
+          "evidence_fingerprint": "c3aeb526990e9bd195214fb71736d38509b1014e2492ebe580f714838ae2bb0e",
           "response_origin": "offline_rule_based",
           "live_inference": false,
           "model_identity": "unverified; no model invoked"

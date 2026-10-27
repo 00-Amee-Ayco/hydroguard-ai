@@ -5,6 +5,10 @@
 # User interface
 streamlit
 
+# API server
+fastapi
+uvicorn
+
 # Data and schemas
 pandas
 pydantic

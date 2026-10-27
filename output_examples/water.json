@@ -1,5 +1,5 @@
 {
-  "run_id": "006f3e86-808a-4556-b1e2-a1f900c36a7d",
+  "run_id": "1a28fceb-11e7-40df-a879-d929636f4c3a",
   "status": "completed",
   "finding": {
     "finding_id": "water-claim-finding",
@@ -33,7 +33,15 @@
       "text": "Project water demand will not significantly affect existing water users. Water demand is described using annual totals and wet-season observations.",
       "domain": "Water",
       "kind": "project",
-      "evidence_items": []
+      "evidence_items": [],
+      "is_synthetic": null,
+      "case_id": null,
+      "source_type": null,
+      "original_filename": null,
+      "locator": null,
+      "issuing_body_or_author": null,
+      "publication_or_effective_date": null,
+      "original_source_url": null
     },
     {
       "source_id": "sample-basis-1",
@@ -45,7 +53,15 @@
       "text": "Review dry-season water balance, existing water users.",
       "domain": "Water",
       "kind": "basis",
-      "evidence_items": []
+      "evidence_items": [],
+      "is_synthetic": null,
+      "case_id": null,
+      "source_type": null,
+      "original_filename": null,
+      "locator": null,
+      "issuing_body_or_author": null,
+      "publication_or_effective_date": null,
+      "original_source_url": null
     }
   ],
   "critic": {
@@ -54,7 +70,7 @@
     "finding_fingerprint": "7212257454dbee4044529c6a34265ddb6ab38a3507c608a11f12fbad787f9c33",
     "decision": "approve",
     "reason": "Offline evidence policy satisfied.",
-    "evidence_fingerprint": "279aeb3db3420354c0551a5a76b30fcb9c0e247166da1bfe78a828f46e179c5a",
+    "evidence_fingerprint": "303f581df2b477da31b9d244584b1d9f88f41116235c132b774703f925418a28",
     "response_origin": "offline_rule_based",
     "live_inference": false,
     "model_identity": "unverified; no model invoked"
@@ -89,7 +105,15 @@
         "text": "Project water demand will not significantly affect existing water users. Water demand is described using annual totals and wet-season observations.",
         "domain": "Water",
         "kind": "project",
-        "evidence_items": []
+        "evidence_items": [],
+        "is_synthetic": null,
+        "case_id": null,
+        "source_type": null,
+        "original_filename": null,
+        "locator": null,
+        "issuing_body_or_author": null,
+        "publication_or_effective_date": null,
+        "original_source_url": null
       },
       {
         "source_id": "sample-basis-1",
@@ -101,7 +125,15 @@
         "text": "Review dry-season water balance, existing water users.",
         "domain": "Water",
         "kind": "basis",
-        "evidence_items": []
+        "evidence_items": [],
+        "is_synthetic": null,
+        "case_id": null,
+        "source_type": null,
+        "original_filename": null,
+        "locator": null,
+        "issuing_body_or_author": null,
+        "publication_or_effective_date": null,
+        "original_source_url": null
       }
     ],
     "assessment_bases": [
@@ -148,7 +180,7 @@
           "finding_fingerprint": "7212257454dbee4044529c6a34265ddb6ab38a3507c608a11f12fbad787f9c33",
           "decision": "approve",
           "reason": "Offline evidence policy satisfied.",
-          "evidence_fingerprint": "279aeb3db3420354c0551a5a76b30fcb9c0e247166da1bfe78a828f46e179c5a",
+          "evidence_fingerprint": "303f581df2b477da31b9d244584b1d9f88f41116235c132b774703f925418a28",
           "response_origin": "offline_rule_based",
           "live_inference": false,
           "model_identity": "unverified; no model invoked"

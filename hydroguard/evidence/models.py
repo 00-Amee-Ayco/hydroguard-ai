@@ -28,6 +28,14 @@ class EvidenceSource(Record):
     domain: Literal["Water", "Land", "Air", "People"] = "Water"
     kind: Literal["project", "evidence", "basis"] = "project"
     evidence_items: tuple[str, ...] = ()
+    is_synthetic: bool | None = None
+    case_id: str | None = None
+    source_type: str | None = None
+    original_filename: str | None = None
+    locator: str | None = None
+    issuing_body_or_author: str | None = None
+    publication_or_effective_date: str | None = None
+    original_source_url: str | None = None
 
 
 class ProjectClaim(Record):
@@ -84,13 +92,13 @@ class GateResult(Record):
 
 class RevisionRecord(Record):
     finding: EvidenceFinding
-    critic: CriticDecision
+    critic: CriticDecision | None
     gate: GateResult
 
 
 class AuditResult(Record):
-    mode: Literal["Sample / Synthetic"] = "Sample / Synthetic"
-    execution: Literal["input-dependent offline rules; no live AI or sponsor services"] = (
+    mode: Literal["Sample / Synthetic", "Live Zetaris / unresolved"] = "Sample / Synthetic"
+    execution: Literal["input-dependent offline rules; no live AI or sponsor services", "live Zetaris retrieval only; no live Critic or World Model"] = (
         "input-dependent offline rules; no live AI or sponsor services"
     )
     claim: ProjectClaim

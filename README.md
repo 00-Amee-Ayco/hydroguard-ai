@@ -2,336 +2,199 @@
 
 **See the claim. Trace the evidence. Challenge the gap. Know what to ask next.**
 
-> **Status:** Hackathon MVP in development. Features and sponsor integrations must be verified in the local environment. This README is a starter template, not evidence that integrations are complete.
+HydroGuard is a Philippine EIA evidence-auditing and consultation-preparation MVP.
+It identifies gaps in reviewed evidence and drafts defensible consultation
+questions. It does not decide project safety, legal compliance or approval.
+Feature development is frozen for submission. Sponsor completion is **partial**.
 
-HydroGuard is an AI-assisted **evidence-auditing and consultation-preparation** tool for people and communities taking part in the Philippine Environmental Impact Assessment (EIA) process.
+## Run from a clean clone
 
-It helps users review project disclosures across **Water, Land, Air, and People**, identify what evidence supports a claim, surface unresolved gaps, and draft defensible questions and next steps for consultation. HydroGuard does **not** determine whether a project is safe, unlawful, compliant, or deserving of approval.
-
-## Implemented offline evidence-auditing slice
-
-The sample audit accepts a typed claim or CLI claim text and domain. It performs
-lexical retrieval over bundled synthetic records, evaluates explicit evidence
-criteria, computes a finding, runs an offline rule-based Critic, and independently
-validates the result through the deterministic gate. Decisions do not branch on
-fixture IDs or exact example sentences. No LLM is trained or invoked.
+Python 3.11+ is required. No GPU or sponsor credentials are needed for sample mode.
 
 ```bash
-SAMPLE_MODE=true .venv/bin/python -m hydroguard.services.audit --domain Water
-SAMPLE_MODE=true .venv/bin/python -m hydroguard.services.audit --domain Land
-SAMPLE_MODE=true .venv/bin/python -m hydroguard.services.audit --domain Air --claim "Project dust emissions will not affect nearby air quality receptors."
-```
-
-JSON output contains the actual retrieved sources, claim, applicable synthetic
-assessment basis, findings, Critic decisions, gate results, and community question.
-Every citation resolves against these records, preserving document/page/chunk
-provenance. Synthetic review criteria are not legal requirements.
-
-The offline Critic is labeled `offline_rule_based`, with `live_inference=false`
-and no verified model identity. It computes decisions from evidence-policy checks;
-it is not independent scientific expertise or live NVIDIA/Meterless inference.
-The gate separately executes those checks, rejects harm and illegality claims,
-and binds approvals to the finding content/revision and evidence context.
-Evidence gaps are computed from missing curated `evidence_items` required by the
-assessment basis. Complete coverage produces a qualified evidence inventory,
-not assurance of safety. Questions are emitted only for gate-approved findings.
-
-Python callers may supply `run_sample_audit(claim, registry=..., bases=...,
-preliminary=...)`. A rejected preliminary finding is revised once from reviewed
-evidence; history remains in memory. The default run starts directly from the
-computed finding and does not manufacture an overclaim. Unmatched claims or
-missing citations/bases fail closed and receive no consultation question.
-
-Limitations: retrieval is lexical and domain-scoped; evidence coverage uses
-curated structured facts, not general semantic interpretation of arbitrary PDFs.
-Changing prose alone does not extract new evidence items. New evidence must be
-represented accurately in both source text and curated facts. People assessments,
-PDF ingestion, Streamlit UI, persistent World Model, reports, and sponsor
-integrations remain planned. The API and its per-run tracing are implemented below. This task does not establish full hackathon compliance.
-
-The CLI reads `SAMPLE_MODE` from the process environment (default `true`), not
-`.env`. `SAMPLE_MODE=false` raises “Live mode is not implemented”; no silent fallback
-occurs. Sponsor fields in `.env.example` remain unused placeholders.
-
-```bash
-source .venv/bin/activate
-python -m pytest -v
-```
-
-Root `app.py` remains an empty scaffold.
-
-## Run the FastAPI interface
-
-From the repository root:
-
-```bash
+git clone https://github.com/00-Amee-Ayco/hydroguard-ai.git
+cd hydroguard-ai
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-python run.py
+SAMPLE_MODE=true python run.py
 ```
 
-The API listens on `http://127.0.0.1:8000`; interactive request documentation is
-available at `/docs`. `run.py` loads local `.env` without overriding process
-variables. Sample mode defaults to true and needs no sponsor credentials.
+On Windows activate `.venv\Scripts\activate` instead. Run commands from the
+repository root. No `.env` is needed for the sample. Optional local configuration
+may be copied from `.env.example`; never put real secrets in that example file.
+These commands require the final working files to be committed/published by the
+owner; this submission-preparation task does not commit or push them.
+Dependencies are unpinned; a fresh dependency installation was not independently
+repeated during the freeze. The credential-free copy check used installed packages.
+
+API: `http://127.0.0.1:8000`; interactive schema: `/docs`.
+In a second terminal:
 
 ```bash
 curl http://127.0.0.1:8000/health
 curl -X POST http://127.0.0.1:8000/run -H 'Content-Type: application/json' --data-binary @input_examples/water.json
+curl -X POST http://127.0.0.1:8000/run -H 'Content-Type: application/json' --data-binary @input_examples/land.json
+curl -X POST http://127.0.0.1:8000/run -H 'Content-Type: application/json' --data-binary @input_examples/air.json
 ```
 
-`GET /health` reports process health, sample/live-unavailable mode, execution
-availability, and explicitly unverified sponsor integrations. It performs no
-sponsor calls. `POST /run` accepts:
+Health reports process/configuration state, not sponsor reachability or complete
+sponsor verification. This local demo API has no deployment authentication.
 
-- `project_claim`: `claim_id`, `project_name`, and nonblank `text`.
-- `domain`: `Water`, `Land`, or `Air`.
-- `case_context`: `stage` (`scoping`, `consultation`, or `review`) and optional
-  private `community_notes`. Stage qualifies the question; notes are accepted
-  but are not interpreted by the offline evidence rules or recorded in traces.
-- `evidence_references`: source IDs from the bundled registry, restricting the
-  retrieval pool. An empty list searches all bundled records for the domain.
-  Unknown, cross-domain, and assessment-basis-only references are rejected.
-
-Responses contain `run_id`, `status`, `finding`, resolved `citations`, `critic`,
-`gate`, `community_question`, and the complete `audit` history. A blocked gate
-returns `status=unresolved` and no question, rather than publishing a conclusion.
-Invalid requests return 422; unsupported live execution returns 503. Unexpected
-failures return a sanitized 500. This local judge/demo interface has no deployment
-authentication or access controls.
-
-`InvestigationService` wraps the existing audit workflow. API runs emit genuine
-JSONL events to stdout and `logs/<run_id>.jsonl` (`HYDROGUARD_LOG_DIR` overrides the
-directory). Events include timestamps, sequence, actual Planner/Investigator/
-Critic/gate/action operations, source IDs, handoffs, branch decisions, retries,
-and terminal status. No retry, sponsor call, or World Model event is invented.
-The Python audit helper can take `trace=RunTrace()`; the existing standalone CLI
-keeps its JSON-only output unless a trace is explicitly supplied.
-
-Raw claims, project/community identifiers, community notes, credentials, and
-exception text are omitted from traces. Source IDs outside the public bundled
-registry are redacted. Validation errors omit input values and field locations;
-HTTP access logging is disabled to avoid logging request URLs. Responses still
-contain the caller's claim and should be handled as private case data. Local
-logs remain ignored by Git.
-
-Three structured requests are in `input_examples/{water,land,air}.json`. Their
-matching `output_examples/*.json` were generated by executing the actual API via
-FastAPI's in-process HTTP client, not by composing response fixtures. Regenerate:
+## Offline sample audit and tests
 
 ```bash
+source .venv/bin/activate
+SAMPLE_MODE=true python -m hydroguard.services.audit --domain Water
+SAMPLE_MODE=true python -m hydroguard.services.audit --domain Land
+SAMPLE_MODE=true python -m hydroguard.services.audit --domain Air --claim "Project dust emissions will not affect nearby air quality receptors."
 SAMPLE_MODE=true python -m scripts.generate_examples
-```
-
-Generation emits real traces and assigns new run IDs. Runtime application modules
-never load output examples as responses. Tests compare new computed responses
-with saved examples after excluding the intentionally unique run ID.
-
-## Intended users
-Affected residents, barangay leaders, farmers, fisherfolk organizations, Indigenous community representatives, NGOs, and community advisers preparing for scoping or environmental consultation.
-
-## MVP features
-- **Community Evidence Assistant:** Questions answered using retrieved project, government, and scientific sources with citation provenance.
-- **Evidence Ledger:** Per-claim record of source citations, assessment basis, evidence strength, limitations, Critic decisions, and gate results.
-- **Critic + deterministic gate:** NVIDIA Nemotron (via Nightshift) reviews proposed findings; rules independently block unsupported claims.
-- **Meterless World Model replanning:** Rejections update case state, which guides a targeted follow-up Zetaris query.
-- **Community Consultation Brief:** DOCX export of approved/qualified findings, community questions, and appropriate next steps using a supported template.
-- **Evidence View:** Technical audit trail behind community-facing conclusions.
-
-Only mark individual features above as **implemented** after real execution and tests; until then they describe intended MVP scope.
-
-## Architecture and remaining targets
-
-The final architecture uses a modular Python application: FastAPI exposes
-`GET /health` and `POST /run`, and Streamlit provides the human-facing UI. Both
-must use the same `InvestigationService`. Case Planner, Evidence Investigator,
-Evidence Critic, and Community Action Planner roles perform observable handoffs
-and decisions, with at most two automatic reinvestigation retries.
-
-A distinct PDF ingestion pipeline retains page provenance and stable chunk/citation
-IDs before indexing project, regulatory, technical-guideline, and scientific sources
-through Zetaris. No LLM training or fine-tuning is planned.
-
-FastAPI, `InvestigationService`, `run.py`, and per-run JSONL tracing are implemented
-for offline execution. The ingestion pipeline, Streamlit workflow, Docker
-packaging, persistent Engine, and live sponsor integrations remain planned.
-
-
-```text
-Project PDFs + community context
-              |
-      Claim extraction
-              |
-      Zetaris retrieval  <-----+  (re-query if missing evidence)
-              |               |
-         Evidence Ledger      |
-              |               |
-    Evidence Critic (Nemotron | via Meterless Nightshift)
-              |               |
-   Deterministic evidence gate|
-          /         \         |
-      approved     blocked     |
-          |          |         |
-  Community Action  World Model+
-          |          |
-    Consultation Brief / Evidence View
-```
-
-**Zetaris:** live data layer for project, regulatory, and scientific evidence.  
-**Meterless World Model:** versioned, persistent investigation state and replanning.  
-**Meterless Nightshift:** primary AI inference gateway.  
-**NVIDIA Nemotron:** adversarial Evidence Critic through Nightshift.
-
-## Requirements
-- Python **3.11+**
-- Git
-- A working Python package installer (`pip`)
-- For **live mode:** authorized Zetaris and Meterless Nightshift access, a working World Model implementation, and an available NVIDIA Nemotron model routed through Nightshift
-- For **sample mode:** bundled synthetic source records and computed offline rules (CLI and API slices)
-
-## Installation from a clean clone
-
-```bash
-git clone https://github.com/YOUR_USERNAME/hydroguard-ai.git
-cd hydroguard-ai
-python3 -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-cp .env.example .env
-```
-
-On Windows, activate with `.venv\\Scripts\\activate` instead.
-
-> Replace `YOUR_USERNAME` with the actual public repository owner. Ensure `.env.example` exists and contains **placeholders only**. Do not commit `.env`.
-
-### Configure environment
-
-The application-level environment variables proposed for this project are:
-
-```dotenv
-SAMPLE_MODE=true
-ZETARIS_BASE_URL=
-ZETARIS_API_TOKEN=
-NIGHTSHIFT_BASE_URL=
-NIGHTSHIFT_API_KEY=
-NIGHTSHIFT_MODEL=
-```
-
-These are **HydroGuard configuration conventions**, not verified vendor environment variable names. Adapt the corresponding application adapters to your HackOS setup guide. Configure NVIDIA credentials in Nightshift's **Providers** tab, not in this project.
-
-## Planned UI entry point (not implemented)
-
-Root `app.py` is empty; the following is a future UI command, not a working
-HydroGuard workflow. Use the implemented offline audit command above today.
-
-
-```bash
-python -m streamlit run app.py
-```
-
-Then open the local URL printed by Streamlit (commonly `http://localhost:8501`).
-
-### Sample mode: input-dependent offline adapters
-
-The implemented CLI computes lexical retrieval, evidence coverage, critique,
-validation, and questions from inputs and retrieved synthetic records. The three
-domain examples above use different evidence coverage. Offline adapters do not
-establish any sponsor integration. See the implementation limits above.
-
-### Live mode (not implemented)
-
-The current CLI fails explicitly when the process environment sets
-`SAMPLE_MODE=false`. The target live workflow requires real configured sponsor
-services and indexed evidence, with no silent fallback to sample mode. No sponsor
-integration is verified by the existing fixture.
-
-## Planned demonstration (not yet implemented end to end)
-
-**Synthetic case:** A proposed industrial development states that its water demand will not materially affect existing domestic and agricultural water users. The disclosed materials include annual demand figures and wet-season observations, but no sufficient dry-season water balance.
-
-1. Upload the project material and provide local community context.
-2. Ask HydroGuard: **“What evidence supports the claim that existing users will not be affected?”**
-3. Inspect the Zetaris-retrieved project passage and relevant assessment basis.
-4. Review the proposed finding and Nemotron Critic decision.
-5. Show the World Model recording a rejected overclaim and requesting additional evidence.
-6. Show the second, targeted Zetaris retrieval and the qualified evidence-gap finding.
-7. Generate a Community Consultation Brief and inspect the detailed Evidence View.
-
-The correct conclusion is **not** that the project necessarily causes water shortages. It is that the available disclosed evidence may not substantiate the project's assurance, if that is what the audited materials establish.
-
-## Three executed sample inputs and matching results
-
-Executed locally using `project_claim(domain)` and `run_sample_audit(claim)`:
-
-- **Water:** “Project water demand will not significantly affect existing water users.”
-  Gate passed a qualified gap finding with **Insufficient** evidence; missing items:
-  `dry-season water balance`, `existing water users`. The question requests those
-  records and their implications for affected users.
-- **Land:** “Earthworks will not increase erosion or slope instability.”
-  Gate passed a qualified gap finding with **Weak** evidence; the erosion baseline
-  is present but `slope stability assessment` is missing. The question requests
-  that assessment.
-- **Air:** “Project dust emissions will not affect nearby air quality receptors.”
-  Gate passed a qualified gap finding with **Weak** evidence; particulate baseline
-  and dispersion assessment are present but `receptor inventory` is missing.
-  The question requests that inventory.
-
-These are actual offline result summaries, not live sponsor outputs. Rerun the
-CLI commands above to inspect full findings, citations, and generated questions.
-
-## Evidence strengths
-
-- **Strong:** Direct, relevant and sufficiently supported for the specific finding.
-- **Moderate:** Meaningful support with important qualifications.
-- **Weak:** Some evidence, insufficient for the stronger conclusion.
-- **Insufficient:** Not enough applicable evidence was identified.
-
-Findings must pass the independent deterministic evidence gate before they are published as affirmative conclusions. Unresolved issues may be shown as clearly labeled questions or gaps.
-
-## Tests
-
-```bash
 python -m pytest -q
 ```
 
-Before submission, document how to execute:
-1. Real Zetaris query smoke test.
-2. Real Nightshift/Nemotron inference test with verified model identity.
-3. Official **Meterless World Model** conformance tests.
-4. Replanning integration test (rejection changes the next query).
-5. Report-generation validation.
-6. Clean-clone sample mode test.
+Latest freeze verification: **202 passed, 0 failed, 8 dependency warnings**.
+All three input files returned HTTP 200 through FastAPI TestClient, with gate
+approval and nonempty consultation questions. `output_examples/{water,land,air}.json`
+were regenerated by actual API execution. Run IDs change on every execution.
+Runtime responses never read these saved outputs; tests enforce this separation.
+A copy excluding ignored private files and sponsor process variables also passed
+health and all three example runs using the existing Python environment.
 
-Add exact commands and their **actual pass/fail outcomes** once verified. Do not include fictional traces or claims.
+Three fictional scenarios use meaningfully different bundled synthetic evidence:
 
-## Sponsor integration evidence
+- **Water:** assurance that demand will not affect existing users; **Insufficient**
+  evidence, missing dry-season water balance and existing-user abstraction evidence.
+- **Land:** assurance that earthworks will not increase erosion or instability;
+  **Weak** evidence, missing slope stability assessment.
+- **Air:** assurance that dust will not affect receptors; **Weak** evidence,
+  missing receptor inventory despite baseline and dispersion evidence.
 
-Add sanitized, genuine traces in `evidence/integration_traces/` after running the application. For each request, show (as available):
-- Zetaris query metadata, retrieved chunk IDs, source and page numbers.
-- World Model version, events and state transitions.
-- Nightshift request metadata, resolved model identity and response status.
-- Critic decision, gate failures, retry intent, and revised finding.
+The offline Critic is **rule-based**, not prerecorded inference or a live model.
+Retrieval, evidence coverage, critique and findings depend on the supplied inputs
+and source records. Assessment criteria in sample mode are synthetic, not legal
+requirements. Evidence-gap approval does not establish project safety or harm.
+People assessments and general semantic analysis are not implemented.
 
-Never commit tokens, secrets, personal details, or confidential project documents.
+## Implemented architecture
 
-## Repository hygiene and security
+```text
+FastAPI /run -> shared InvestigationService
+                   |
+        Planner -> Evidence Investigator
+                   | sample: bundled lexical retrieval
+                   | live: authenticated Zetaris SQL retrieval
+                   v
+            typed Evidence Ledger
+                   |
+        sample: offline rule-based Critic
+        live: no integrated Critic approval
+                   v
+        independent deterministic Evidence Gate
+                   |
+        qualified question OR unresolved result
+```
 
-- GitHub repository must be **public** for judging.
-- `.env` and local credentials must be excluded via `.gitignore`.
-- `.env.example` must contain placeholders only.
-- Use synthetic or appropriately licensed documents for public demo data.
-- Preserve source citations, provenance, and regulatory version information.
-- Human technical/legal review is still required for consequential decisions.
+Pydantic schemas retain sources, document/page/chunk references, assessment bases,
+findings, revisions and Critic fingerprints. The gate blocks unsupported harm or
+non-compliance, invalid/missing citations or assessment bases, rejected Critic
+decisions and stale approvals. Missing evidence is never proof of harm.
+Evidence strengths are Strong, Moderate, Weak and Insufficient.
 
-## Known limitations
+PDF/DOCX ingestion is separate from orchestration. PDF page provenance and DOCX
+paragraph/section references are retained; scanned PDFs are flagged rather than
+inventing text. Stable IDs and deterministic JSONL/CSV exports support citations.
+DOCX page numbers are not invented. Private corpora are not shipped in the clone.
+See [ingestion details](docs/knowledge-ingestion.md).
 
-- Current implementation supports bounded offline Water, Land, and Air investigations over curated synthetic records. People and general document interpretation remain unimplemented.
-- Evidence not found in reviewed documents does not prove the evidence does not exist elsewhere.
-- The product is not a replacement for professional environmental assessment, legal advice, or government decision-making.
-- Arbitrary DOCX templates, scanned/OCR-only PDFs, and large-scale source ingestion may require further work.
+Actual per-run JSONL events go to stdout and ignored `logs/<run_id>.jsonl`.
+They record handoffs, retrieval, source IDs, Critic/gate decisions and status.
+Sensitive inputs and credentials are omitted; raw local traces are not submission
+artifacts. No World Model transition or model identity is invented.
 
-## Roadmap
-Expand to wider project/EIA coverage, multilingual community workflows, stronger retrieval and citation verification, multiple case histories, expert directories, and richer report templates.
+## Sponsor and feature status
 
-## License
-Add a `LICENSE` file appropriate for this repository before submission.
+| Component | Submission status | Evidence / limitation |
+| --- | --- | --- |
+| Zetaris | IMPLEMENTED / LIVE RETRIEVAL VERIFIED | Authenticated genuine passage retrieval through FastAPI and Investigator; latest freeze run returned one passage, page 197. |
+| Nightshift | AUTHENTICATED DISCOVERY VERIFIED | Local M1–M4 runtime, HTTP 200, 19 advertised routes; isolated provider probe only. |
+| NVIDIA Nemotron | BLOCKED / NOT VERIFIED | Inference HTTP 502; no output or verified winning model. Earlier upstream 403; latest error unclassified. |
+| Meterless World Model | NOT VERIFIED / PLANNED | No functioning official Engine integration or conformance claim. |
+| Offline Critic and deterministic gate | IMPLEMENTED / TESTED | Computed sample decisions and independent validation; no sponsor inference. |
+| Community evidence UI | PLANNED | Root Streamlit app is a separate provider setup/chat panel, not the community evidence workflow. |
+| Consultation DOCX generator | PLANNED / NOT VERIFIED | DOCX extraction dependencies do not establish report generation. |
+
+## Live Zetaris verification (separate from sample mode)
+
+Place the following only in ignored `.env.local` or process environment:
+`ZETARIS_REST_URL` (API base ending `/api/v1.0`), `ZETARIS_API_KEY`,
+`ZETARIS_ORG_ID`. Optional `ZETARIS_REGULATORY_TABLE` defaults to
+`HYDROGUARD.regulatory`. Process settings take precedence. The adapter explicitly
+reads `.env.local` (or `ZETARIS_ENV_FILE`); legacy URL/token names are not aliases.
+
+```bash
+SAMPLE_MODE=false python -m scripts.verify_live_retrieval
+```
+
+Latest freeze execution: **retrieval PASS**, HTTP 200 through `/run`, one genuine
+regulatory passage consumed by the Investigator, PDF **page 197**, source ID:
+
+`chunk-896f3cda0c6530a65e9e1e642155bea4557fa63f54652fa7a6770339fc7ef8c8`
+
+Run ID: `9c920294-9aa0-449b-a4e0-600477763e42`.
+The investigation was **unresolved**, `gate_passed=false`, `critic_invoked=false`.
+The retrieved form/example page does not establish applicable legal requirements.
+This is passage-retrieval success, not a complete live evidence-control loop.
+No synthetic fallback occurs on live failures or empty results.
+See [query/provenance details](docs/live-zetaris-retrieval.md) and the separately
+fictional [Riverside case](docs/riverside-water-case.md). Local private source files,
+registered tables and credentials are prerequisites for those live case commands.
+Do not run registration commands merely to demonstrate read-only retrieval.
+
+## Configuration and isolated Nightshift probe
+
+`run.py` loads `.env` without overriding process variables. `SAMPLE_MODE=true`
+defaults to offline; the standalone audit CLI reads process configuration only.
+The live Zetaris adapter and standalone Nightshift probe explicitly read their
+local configuration as documented; there is no universal `.env.local` loader.
+
+```bash
+python -m scripts.verify_nightshift_critic
+```
+
+This isolated probe reads `NIGHTSHIFT_BASE_URL`, `NIGHTSHIFT_API_KEY`,
+`METERLESS_RUNTIME_TOKEN` and `NIGHTSHIFT_MODEL`, with process overrides over
+`.env.local` over `.env`, then private provider settings as fallback. It is not
+connected to InvestigationService. It makes at most one Nemotron inference and
+never substitutes a different provider. **Current result: BLOCKED, HTTP 502.**
+Do not describe configured credentials or discovery as successful inference.
+[Diagnostic history and safe error reporting](docs/nightshift-critic-smoke.md)
+contain the exact limitations. No sponsor troubleshooting was done during freeze.
+
+## Privacy, reproducibility and limitations
+
+`.env`, `.env.local`, private provider settings, PDFs under `data/knowledge/` and
+`data/cases/`, full-text exports under `data/processed/`, and `logs/` are ignored
+and absent from tracked files. The tracked/staged and submission-worktree secret
+checks found no detected credentials; this is a bounded pattern/value scan, not
+a guarantee. No files were staged by this task. Do not paste secrets into IDE chat.
+Do not publish restricted full text or unsanitized traces.
+
+Sample retrieval is lexical and evidence coverage relies on curated structured
+facts. Arbitrary prose changes do not extract new facts. Legal applicability
+requires expert review. Live findings remain unresolved without project-specific
+support, applicable assessment bases and current Critic approval. Automatic
+Critic-driven World Model replanning and DOCX consultation briefs are incomplete.
+No claim of full hackathon technology compliance is made.
+
+Docker daemon availability was verified (29.9.2). No Dockerfile or existing app
+image/deployment stack is provided, so container execution is **not verified**;
+no new stack was built during freeze. Use the Python commands above.
+
+Many implementation files remain untracked or modified locally. The owner must
+review, commit and publish the intended safe files before a remote clean clone
+can include them. No automatic commit/push was performed. Repository licensing
+and submission disclosure requirements still require owner review.
+
+See [submission summary](docs/submission-summary.md) and
+[five-slide demo outline](docs/demo-slides.md). Historical documentation records
+prior checks; this README and the summary state the current submission status.

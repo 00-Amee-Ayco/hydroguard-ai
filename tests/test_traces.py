@@ -89,11 +89,13 @@ def test_extra_field_names_do_not_leak_private_values():
     assert "private credential" not in response.text
 
 
-def test_live_unavailable_trace_does_not_claim_offline_execution(monkeypatch, capsys):
+def test_live_unavailable_trace_does_not_claim_offline_execution(monkeypatch, capsys, tmp_path):
+    monkeypatch.setenv("ZETARIS_ENV_FILE", str(tmp_path / "missing.env"))
     from hydroguard.services.audit import LiveModeUnavailable
     monkeypatch.setenv("SAMPLE_MODE", "false")
     with pytest.raises(LiveModeUnavailable):
         InvestigationService().run(request())
     events = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
-    assert all(event["mode"] == "live_unavailable" for event in events)
+    assert events[0]["mode"] == "live_requested"
+    assert events[-1]["mode"] == "live_unavailable"
     assert [event["event"] for event in events] == ["run_started", "run_failed"]
