@@ -155,7 +155,7 @@ def test_ui_unauthorized_shows_masked_token_field(tmp_path,monkeypatch):
         def __init__(self,connection):pass
         def probe(self):return ProviderStatus("unauthorized")
     monkeypatch.setattr(ui,"MeterlessProvider",Provider)
-    at=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py")).run()
+    at=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"provider_app.py")).run()
     at.text_input[1].set_value("test-token")
     next(button for button in at.button if button.label=="Connect").click()
     at.run()

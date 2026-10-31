@@ -1,4 +1,3 @@
-"""Human-facing provider setup; the existing FastAPI evidence workflow is separate."""
-from hydroguard.ui.provider_settings import render
-
+"""Streamlit community evidence workspace; investigations run only through FastAPI."""
+from hydroguard.ui.dashboard import render
 render()
