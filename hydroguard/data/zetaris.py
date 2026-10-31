@@ -47,22 +47,62 @@ class ZetarisEvidenceRetriever:
         self.project_case_id = project_case_id
 
     @classmethod
+    
     def from_environment(cls, trace=None):
+        env_file = Path(
+            os.environ.get("ZETARIS_ENV_FILE", ".env.local")
+        )
+
+        # Do not silently fall back to environment credentials
+        # when the selected configuration file is missing.
+        if not env_file.is_file():
+            raise ZetarisConfigurationError(
+                "Zetaris configuration file is unavailable; values omitted"
+            )
+
         try:
-            config = Config.load(Path(os.environ.get("ZETARIS_ENV_FILE", ".env.local")))
+            config = Config.load(env_file)
         except SmokeError:
-            raise ZetarisConfigurationError("Missing or invalid Zetaris REST configuration; values omitted") from None
-        file_values = dotenv_values(Path(os.environ.get("ZETARIS_ENV_FILE", ".env.local")), interpolate=False)
-        table = os.environ.get("ZETARIS_REGULATORY_TABLE", file_values.get("ZETARIS_REGULATORY_TABLE") or "HYDROGUARD.regulatory")
+            raise ZetarisConfigurationError(
+                "Missing or invalid Zetaris REST configuration; values omitted"
+            ) from None
+
+        file_values = dotenv_values(env_file, interpolate=False)
+
+        table = os.environ.get(
+            "ZETARIS_REGULATORY_TABLE",
+            file_values.get("ZETARIS_REGULATORY_TABLE")
+            or "HYDROGUARD.regulatory",
+        )
+
         regulatory = cls(config, table, trace)
-        project_table = os.environ.get("ZETARIS_PROJECT_TABLE", file_values.get("ZETARIS_PROJECT_TABLE"))
-        case_id = os.environ.get("ZETARIS_PROJECT_CASE_ID", file_values.get("ZETARIS_PROJECT_CASE_ID"))
+
+        project_table = os.environ.get(
+            "ZETARIS_PROJECT_TABLE",
+            file_values.get("ZETARIS_PROJECT_TABLE"),
+        )
+
+        case_id = os.environ.get(
+            "ZETARIS_PROJECT_CASE_ID",
+            file_values.get("ZETARIS_PROJECT_CASE_ID"),
+        )
+
         if bool(project_table) != bool(case_id):
-            raise ZetarisConfigurationError("Both project table and case ID must be configured together")
+            raise ZetarisConfigurationError(
+                "Both project table and case ID must be configured together"
+            )
+
         if project_table:
-            project = cls(config, project_table, trace, project_case_id=case_id)
+            project = cls(
+                config,
+                project_table,
+                trace,
+                project_case_id=case_id,
+            )
             return CaseScopedRetriever(regulatory, project, case_id)
+
         return regulatory
+
 
     def retrieve(self, claim: ProjectClaim) -> dict[str, EvidenceSource]:
         fields = FIELDS

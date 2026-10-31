@@ -23,6 +23,7 @@ class AuditClient:
             if r.status_code != 200:
                 messages = {422:'The case input or evidence references were rejected.',
                             502:'Live retrieval failed. No sample evidence was substituted.',
+                             409:'Live Zetaris search requires the backend in live mode.',
                             503:'Live configuration is unavailable.'}
                 raise BackendError(messages.get(r.status_code, 'The backend could not complete this request.'))
             return r.json()
@@ -30,6 +31,12 @@ class AuditClient:
             raise BackendError('The backend timed out. Check its status before running again.') from None
         except (httpx.HTTPError, ValueError):
             raise BackendError('Cannot reach a valid backend response. Start the FastAPI server and check configuration.') from None
+
+    def search(self, query: str, domain: str = "Water"):
+        result = self.request("GET", "/evidence/search", params={"query": query, "domain": domain})
+        if not isinstance(result, dict) or result.get("origin") != "live_zetaris" or not isinstance(result.get("results"), list):
+            raise BackendError("Invalid live evidence search response.")
+        return result
 
     def health(self):
         data = self.request('GET','/health')

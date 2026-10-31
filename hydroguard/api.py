@@ -1,10 +1,12 @@
 """Judge-runnable offline FastAPI interface."""
 import os
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from hydroguard.services.audit import LiveModeUnavailable
-from hydroguard.data.zetaris import ZetarisRetrievalError
+from hydroguard.data.zetaris import ZetarisRetrievalError, ZetarisEvidenceRetriever, ZetarisConfigurationError, TERMS
+from hydroguard.evidence.models import ProjectClaim
+import re
 from hydroguard.services.investigation import (InvestigationService, InvalidEvidenceReference,
                                                RunRequest, RunResponse)
 
@@ -38,3 +40,45 @@ def run(request: RunRequest):
         raise HTTPException(status_code=502, detail="Live Zetaris retrieval failed; no sample fallback") from None
     except Exception:
         raise HTTPException(status_code=500, detail="Investigation failed; consult the sanitized run trace") from None
+
+
+@app.get("/evidence/search")
+def search_regulatory_evidence(
+    query: str = Query(min_length=2, max_length=120),
+    domain: str = Query(default="Water"),
+):
+    """Local-only demo search of genuine regulatory rows; no LLM or conclusion.
+
+    Only known, fixed topical terms reach the existing safe SQL builder.
+    Keep the API bound to localhost until authentication/authorization exists.
+    """
+    if os.environ.get("SAMPLE_MODE", "true").lower() == "true":
+        raise HTTPException(409, "Live Zetaris search requires SAMPLE_MODE=false")
+    if domain not in TERMS:
+        raise HTTPException(422, "Unsupported search domain")
+    if not re.fullmatch(r"[a-zA-Z\s-]+", query):
+        raise HTTPException(422, "Use letters, spaces and hyphens only")
+    words = set(re.findall(r"[a-z]+", query.lower()))
+    recognized = sorted(words.intersection(TERMS[domain]))
+    if not recognized:
+        raise HTTPException(422, "No supported topic terms. Try water, groundwater, baseline, season, demand or users for Water.")
+    claim = ProjectClaim(
+        claim_id="knowledge-explorer",
+        project_name="Knowledge Explorer (regulatory source lookup)",
+        text=" ".join(recognized), domain=domain, citation_ids=(),
+    )
+    try:
+        retriever = ZetarisEvidenceRetriever.from_environment()
+        sources = retriever.retrieve(claim)
+    except ZetarisConfigurationError:
+        raise HTTPException(503, "Live Zetaris configuration unavailable") from None
+    except ZetarisRetrievalError:
+        raise HTTPException(502, "Live Zetaris search failed; no sample fallback") from None
+    # Only regulatory results; case-scoped project data is not exposed here.
+    results = [item.model_dump(mode="json") for item in sources.values()
+               if item.source_type == "regulatory"]
+    return {
+        "origin": "live_zetaris", "domain": domain,
+        "supported_terms_used": recognized, "result_count": len(results),
+        "results": results,
+    }

@@ -111,6 +111,39 @@ def render():
             except BackendError as error:
                 st.error(str(error))
         return
+    if page == PAGES[2]:
+        st.subheader('Live Zetaris Knowledge Explorer')
+        st.caption('Search genuine regulatory source passages. This is a document lookup, not a claim verdict or AI chatbot.')
+        if sample:
+            st.warning('Live search is disabled in sample mode. Start the API with SAMPLE_MODE=false and valid Zetaris configuration.')
+            return
+        with st.form('live_zetaris_search'):
+            search_domain = st.selectbox('Environmental domain', ['Water', 'Land', 'Air'])
+            query = st.text_input('Search terms', value='water users',
+                help='Use supported topic keywords. For Water: water, groundwater, baseline, season, demand, users.')
+            submitted_search = st.form_submit_button('Search Zetaris', type='primary')
+        if submitted_search:
+            try:
+                with st.spinner('Querying Zetaris for regulatory evidence…'):
+                    st.session_state['zetaris_search'] = client.search(query, search_domain)
+            except BackendError as error:
+                st.session_state.pop('zetaris_search', None)
+                st.error(str(error))
+        searched = st.session_state.get('zetaris_search')
+        if searched:
+            st.success('Live Zetaris query completed. This does not verify a project claim.')
+            st.metric('Retrieved source records', searched['result_count'])
+            st.caption('Matched topics: ' + ', '.join(searched['supported_terms_used']))
+            if not searched['results']:
+                st.info('No matching passages were returned for these topics.')
+            for i, source in enumerate(searched['results'], 1):
+                title = display(source.get('document_title', 'Untitled source'))
+                with st.expander(f'{i}. {title} · page {source.get("page") or "not supplied"}'):
+                    st.caption('Source ID: ' + display(source.get('source_id')))
+                    st.caption('Document ID: ' + display(source.get('document_id')))
+                    st.caption('Source type: regulatory · Origin: live Zetaris')
+                    st.write(display(source.get('text', '')))
+        return
     if not result:
         st.info('Run an evidence audit in Case workspace first.'); return
     st.caption('Run ' + result.run_id + ' · ' + display(result.audit.mode))
@@ -135,12 +168,6 @@ def render():
         st.subheader('Consultation question')
         st.text(display(result.community_question) if result.gate.passed and result.community_question else 'No validated consultation question is available.')
         source_details(result)
-    elif page == PAGES[2]:
-        st.subheader('Community evidence explorer')
-        st.info('This explorer filters actual audit results. It is not an AI chatbot and makes no new inference.')
-        query=st.text_input('Find a reviewed source by title, source ID or chunk ID')
-        filtered=result.model_copy(update={'citations':tuple(s for s in result.citations if query.lower() in (s.document_title+' '+s.source_id+' '+s.chunk_id).lower())})
-        source_details(filtered)
     else:
         st.subheader('Prepare for consultation')
         text=brief(result)
