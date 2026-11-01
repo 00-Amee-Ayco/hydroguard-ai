@@ -58,13 +58,73 @@ def brief(result):
 
 def render():
     st.set_page_config(page_title='HydroGuard · Evidence workspace',page_icon='🌿',layout='wide')
-    st.markdown('''<style>
-    .stApp {background:#f7f9f7;color:#152f40} h1,h2,h3 {color:#123a48}
-    .stMainBlockContainer {max-width:1180px;padding-top:2rem}
-    [data-testid="stSidebar"] {background:#e7f0ec}
-    div[data-testid="stMetric"] {background:#edf4f1;border-radius:12px;padding:16px}
-    .stButton>button[kind="primary"] {background:#006f70;color:white;border:0}
-    </style>''',unsafe_allow_html=True)
+    
+    st.markdown("""
+    <style>
+    /* Main page */
+    .stApp {
+        background-color: #F7F9F8;
+        color: #173042;
+    }
+
+    .stMainBlockContainer {
+        max-width: 1400px;
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+    }
+
+    /* Headings and body */
+    h1, h2, h3 {
+        color: #173042 !important;
+        font-weight: 700;
+    }
+
+    p, label {
+        color: #173042;
+    }
+
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #E8F0EC;
+        border-right: 1px solid #CCDCD3;
+    }
+
+    [data-testid="stSidebar"] * {
+        color: #173042;
+    }
+
+    /* Form controls */
+    .stTextInput input,
+    .stTextArea textarea {
+        background-color: #FFFFFF;
+        color: #173042;
+        border: 1px solid #B8CCC2;
+        border-radius: 6px;
+    }
+
+    /* Primary buttons */
+    .stButton > button[kind="primary"] {
+        background-color: #116149;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    .stButton > button[kind="primary"]:hover {
+        background-color: #0B4936;
+        color: #FFFFFF;
+    }
+
+    /* Metrics */
+    div[data-testid="stMetric"] {
+        background-color: #FFFFFF;
+        border: 1px solid #D5E2DA;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     st.title('HydroGuard')
     st.caption('See the claim. Trace the evidence. Challenge the gap. Know what to ask next.')
     st.session_state.setdefault('case',json.loads(json.dumps(DEFAULT)))
