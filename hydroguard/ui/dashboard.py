@@ -58,16 +58,157 @@ def brief(result):
 
 def render():
     st.set_page_config(page_title='HydroGuard · Evidence workspace',page_icon='🌿',layout='wide')
-    st.markdown('''<style>
-    .stApp {background:#f7f9f7;color:#152f40} h1,h2,h3 {color:#123a48}
-    .stMainBlockContainer {max-width:1180px;padding-top:2rem}
-    [data-testid="stSidebar"] {background:#e7f0ec}
-    div[data-testid="stMetric"] {background:#edf4f1;border-radius:12px;padding:16px}
-    .stButton>button[kind="primary"] {background:#006f70;color:white;border:0}
-    </style>''',unsafe_allow_html=True)
-    st.title('HydroGuard')
-    st.caption('See the claim. Trace the evidence. Challenge the gap. Know what to ask next.')
+    st.markdown("""
+    <style>
+    /* Main background */
+    .stApp {
+        background-color: #F5F8F7;
+        color: #183447;
+    }
+
+    .stMainBlockContainer {
+        max-width: 1450px;
+        padding-top: 1rem;
+        padding-bottom: 3rem;
+    }
+
+    /* Typography */
+    h1, h2, h3 {
+        color: #173447 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background: #EAF1ED;
+        border-right: 1px solid #D2E0D9;
+    }
+
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] p {
+        color: #173447;
+    }
+
+    /* Form controls */
+    .stTextInput input,
+    .stTextArea textarea {
+        background-color: #FFFFFF;
+        color: #173447;
+        border: 1px solid #BFCFC8;
+        border-radius: 6px;
+    }
+
+    /* Primary buttons */
+    .stButton > button[kind="primary"],
+    .stFormSubmitButton > button[kind="primary"] {
+        background: #116149;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    .stButton > button[kind="primary"]:hover,
+    .stFormSubmitButton > button[kind="primary"]:hover {
+        background: #0B4936;
+        color: white;
+    }
+
+    /* Metrics */
+    [data-testid="stMetric"] {
+        background: #FFFFFF;
+        padding: 16px;
+        border: 1px solid #D7E3DC;
+        border-radius: 8px;
+    }
+
+    /* Expanders */
+    [data-testid="stExpander"] {
+        background: #FFFFFF;
+        border: 1px solid #D7E3DC;
+        border-radius: 8px;
+    }
+
+    /* Tables */
+    [data-testid="stDataFrame"] {
+        border: 1px solid #D7E3DC;
+        border-radius: 8px;
+    }
+
+    /* Shared card */
+    .hg-card {
+        background: #FFFFFF;
+        border: 1px solid #D7E3DC;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+
+    .hg-eyebrow {
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #116149;
+        letter-spacing: 0.08em;
+    }
+
+    .hg-subtitle {
+        color: #526B76;
+        font-size: 0.95rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="
+        background:linear-gradient(110deg,#102B3F,#174B48);
+        color:white;
+        padding:24px 28px;
+        border-radius:9px;
+        margin-bottom:24px;
+    ">
+      <div style="
+          color:#B5E5CE;
+          font-size:12px;
+          font-weight:700;
+          letter-spacing:2px;
+          margin-bottom:8px;
+      ">
+          ENVIRONMENTAL EVIDENCE INTELLIGENCE
+      </div>
+
+      <div style="
+          font-size:36px;
+          font-weight:800;
+          line-height:1.15;
+          color:white;
+      ">
+          HydroGuard
+      </div>
+
+      <div style="
+          color:#D8EAE6;
+          margin-top:10px;
+          font-size:15px;
+      ">
+          See the claim. Trace the evidence.
+          Challenge the gap. Know what to ask next.
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     st.session_state.setdefault('case',json.loads(json.dumps(DEFAULT)))
+
+    st.sidebar.markdown("""
+    ### HYDROGUARD
+
+    **Environmental Evidence Workspace**
+
+    Philippine EIA Evidence Intelligence
+
+    ---
+    """)
+
     page = st.sidebar.radio('Workspace',PAGES)
     st.sidebar.caption('1. Describe a case → 2. Audit → 3. Explore → 4. Prepare')
     try:
