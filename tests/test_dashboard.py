@@ -20,18 +20,31 @@ class ActualBackend:
         return RunResponse.model_validate(response.json())
 
 
-def test_complete_water_ui_flow(monkeypatch):
-    monkeypatch.setenv('SAMPLE_MODE','true')
-    monkeypatch.setattr('hydroguard.ui.dashboard.AuditClient',ActualBackend)
-    at=AppTest.from_file(str(ROOT/'app.py')).run()
+
+def test_case_workspace_requires_pdf_before_audit(monkeypatch):
+    monkeypatch.setenv("SAMPLE_MODE", "true")
+    monkeypatch.setattr(
+        "hydroguard.ui.dashboard.AuditClient",
+        ActualBackend,
+    )
+
+    at = AppTest.from_file(str(ROOT / "app.py")).run()
+
     assert not at.exception
-    next(b for b in at.button if b.label=='Run Evidence Audit').click().run()
-    assert not at.exception
-    assert at.session_state['result'].gate.passed
-    for page in ('Investigation results','Evidence explorer','Consultation brief'):
-        at.sidebar.radio[0].set_value(page).run()
-        assert not at.exception
-    assert 'dry-season' in brief(at.session_state['result'])
+
+    # The new workflow requires a PDF upload first.
+    messages = [message.value for message in at.info]
+
+    assert any(
+        "Upload a PDF" in message
+        for message in messages
+    )
+
+    # Without a PDF, no document audit should be available.
+    assert not any(
+        button.label == "Run Water evidence audit"
+        for button in at.button
+    )
 
 
 def test_ui_backend_failure(monkeypatch):

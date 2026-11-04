@@ -48,12 +48,32 @@ class ZetarisEvidenceRetriever:
 
     @classmethod
     def from_environment(cls, trace=None):
+        env_file = Path(
+            os.environ.get("ZETARIS_ENV_FILE", ".env.local")
+        )
+
+        if not env_file.is_file():
+            raise ZetarisConfigurationError(
+                "Zetaris configuration file is unavailable; values omitted"
+            )
+
         try:
-            config = Config.load(Path(os.environ.get("ZETARIS_ENV_FILE", ".env.local")))
+            config = Config.load(env_file)
         except SmokeError:
-            raise ZetarisConfigurationError("Missing or invalid Zetaris REST configuration; values omitted") from None
-        file_values = dotenv_values(Path(os.environ.get("ZETARIS_ENV_FILE", ".env.local")), interpolate=False)
-        table = os.environ.get("ZETARIS_REGULATORY_TABLE", file_values.get("ZETARIS_REGULATORY_TABLE") or "HYDROGUARD.regulatory")
+            raise ZetarisConfigurationError(
+                "Missing or invalid Zetaris REST configuration; values omitted"
+            ) from None
+
+        file_values = dotenv_values(
+            env_file, interpolate=False
+        )
+        # Read the table from the selected configuration file,
+        # allowing an explicit environment variable override.
+        table = (
+            os.environ.get("ZETARIS_REGULATORY_TABLE")
+            or file_values.get("ZETARIS_REGULATORY_TABLE")
+            or "HYDROGUARD.regulatory"
+        )
         regulatory = cls(config, table, trace)
         project_table = os.environ.get("ZETARIS_PROJECT_TABLE", file_values.get("ZETARIS_PROJECT_TABLE"))
         case_id = os.environ.get("ZETARIS_PROJECT_CASE_ID", file_values.get("ZETARIS_PROJECT_CASE_ID"))
